@@ -1,11 +1,11 @@
 let cacheName = 'cache-v1';
 let urlsToCache = [
-  '/',
-  '/index.html',
-  '/css/index.css',
-  '/css/mdb.min.css',
-  '/exchange.png',
-  '/index.js',
+  '/currency-converter-ALC-7DaysOfCode-Challenge/',
+  './index.html',
+  './css/index.css',
+  './css/mdb.min.css',
+  './exchange.png',
+  './index.js',
 ];
 self.addEventListener('fetch', event => {
   event.respondWith(
