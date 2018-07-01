@@ -51,9 +51,14 @@ input {
   padding: 10px;
 }
 .container .result {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   min-width: 200px;
   padding: calc(10px + 0.5vw);
   background: rgb(223, 249, 251);
   justify-content: space-around;
   margin: calc(10px + 0.5vw);
+  height: 40px;
+  border: 0.5px solid #010101;
 }

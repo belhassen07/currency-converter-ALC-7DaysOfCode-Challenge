@@ -6,7 +6,7 @@ let conversion_of_one_unit = document.getElementById('conversion_of_one_unit');
 let currenciesList;
 let selectCurrencies = [];
 const dbPromise = idb.open('currenciesConverter', 1, upgradeDB => {
-  upgradeDB.createObjectStore('keyval');
+  upgradeDB.createObjectStore('currencies');
 });
 let db;
 let store;
@@ -61,15 +61,15 @@ const IDB = {
   get(key) {
     return dbPromise.then(db => {
       return db
-        .transaction('keyval')
-        .objectStore('keyval')
+        .transaction('currencies')
+        .objectStore('currencies')
         .get(key);
     });
   },
   set(key, val) {
     return dbPromise.then(db => {
-      const tx = db.transaction('keyval', 'readwrite');
-      tx.objectStore('keyval').put(val, key);
+      const tx = db.transaction('currencies', 'readwrite');
+      tx.objectStore('currencies').put(val, key);
       return tx.complete;
     });
   },
@@ -79,15 +79,28 @@ const IDB = {
 let conversion = (sourceName, targetName, number) => {
   let sourceCode = getCodeFromName(sourceName);
   let targetCode = getCodeFromName(targetName);
-  fetch(
-    `https://free.currencyconverterapi.com/api/v5/convert?q=${sourceCode}_${targetCode}`
-  )
-    .then(response => response.json())
-    .then(conversionObject => {
-      let value = conversionObject.results[`${sourceCode}_${targetCode}`].val;
+
+  let value;
+  IDB.get(`${sourceCode}_${targetCode}`)
+    .then(val => {
+      if (val != undefined) {
+        console.log(val);
+        value = val;
+      } else {
+        fetch(
+          `https://free.currencyconverterapi.com/api/v5/convert?q=${sourceCode}_${targetCode}`
+        )
+          .then(response => response.json())
+          .then(conversionObject => {
+            value = conversionObject.results[`${sourceCode}_${targetCode}`].val;
+          });
+      }
+      return value;
+    })
+    .then(value => {
       IDB.set(`${sourceCode}_${targetCode}`, value);
-      result.innerText = value * number + targetCode;
-      conversion_of_one_unit.innerText = value + 'per unit';
+      result.innerText = value * number + ' ' + targetCode;
+      conversion_of_one_unit.innerText = `1 ${sourceCode} = ${value} ${targetCode} `;
     })
     .catch(error =>
       console.log('error while fetching the API for a conversion :' + error)
