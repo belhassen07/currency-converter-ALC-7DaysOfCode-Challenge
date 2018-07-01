@@ -5,8 +5,11 @@ let urlsToCache = [
   './css/index.css',
   './css/mdb.min.css',
   './exchange.png',
-  './index.js',
+  './javascript/index.js',
+  './javascript/idb.min.js',
+  'https://free.currencyconverterapi.com/api/v5/currencies',
 ];
+
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches
