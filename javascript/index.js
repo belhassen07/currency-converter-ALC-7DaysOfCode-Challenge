@@ -82,37 +82,38 @@ let conversion = (sourceName, targetName, number) => {
 
   let value;
   //get the conversion rate from the indexedDB
-  IDB.get(`${sourceCode}_${targetCode}`)
-    .then(val => {
-      if (typeof val == 'number') {
-        value = val;
-        console.log(value);
+
+  fetch(
+    `https://free.currencyconverterapi.com/api/v5/convert?q=${sourceCode}_${targetCode}`
+  )
+    .then(async response => {
+      if (response) {
+        let conversionObject = await response.json();
+        value = conversionObject.results[`${sourceCode}_${targetCode}`].val;
       } else {
-        //if data doesn't exist in the indexedDB, we take it from the network with a happy fetch
-        fetch(
-          `https://free.currencyconverterapi.com/api/v5/convert?q=${sourceCode}_${targetCode}`
-        )
-          .then(response => response.json())
-          .then(conversionObject => {
-            value = conversionObject.results[`${sourceCode}_${targetCode}`].val;
-            return value;
-          })
-          .then(value => {
-            IDB.set(`${sourceCode}_${targetCode}`, value);
-          });
+        IDB.get(`${sourceCode}_${targetCode}`).then(val => {
+          console.log(val);
+          value = val;
+        });
       }
+      return value;
+    })
+
+    .then(value => {
+      IDB.set(`${sourceCode}_${targetCode}`, value);
       return value;
     })
     .then(value => {
       //store the conversion code and its value in the indexedDB
-
-      IDB.set(`${sourceCode}_${targetCode}`, value);
       result.innerText = value * number + ' ' + targetCode;
       conversion_of_one_unit.innerText = `1 ${sourceCode} = ${value} ${targetCode} `;
     })
-    .catch(error =>
-      console.log('error while fetching the API for a conversion :' + error)
-    );
+    .catch(error => {
+      console.log(
+        'error while fetching the API for a conversion, I think youve gone offline'
+      );
+      throw error;
+    });
 };
 
 conversionButton.onclick = () => {
