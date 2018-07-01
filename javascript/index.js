@@ -83,22 +83,35 @@ let conversion = (sourceName, targetName, number) => {
   let value;
   //get the conversion rate from the indexedDB
 
-  fetch(
-    `https://free.currencyconverterapi.com/api/v5/convert?q=${sourceCode}_${targetCode}`
-  )
-    .then(async response => {
-      if (response) {
-        let conversionObject = await response.json();
-        value = conversionObject.results[`${sourceCode}_${targetCode}`].val;
+  IDB.get(`${sourceCode}_${targetCode}`)
+    .then(val => {
+      if (typeof val == 'number') {
+        value = val;
       } else {
-        IDB.get(`${sourceCode}_${targetCode}`).then(val => {
-          console.log(val);
-          value = val;
-        });
+        fetch(
+          `https://free.currencyconverterapi.com/api/v5/convert?q=${sourceCode}_${targetCode}`
+        )
+          .then(response => response.json())
+          .then(conversionObject => {
+            value = conversionObject.results[`${sourceCode}_${targetCode}`].val;
+            return value;
+          })
+          .then(value => {
+            IDB.set(`${sourceCode}_${targetCode}`, value);
+            return value;
+          })
+          .then(value => {
+            //store the conversion code and its value in the indexedDB
+            if (value != undefined) {
+              result.innerText = value * number + ' ' + targetCode;
+              conversion_of_one_unit.innerText = `1 ${sourceCode} = ${value} ${targetCode} `;
+            }
+          });
       }
-      return value;
+      if (value != undefined) {
+        return value;
+      }
     })
-
     .then(value => {
       IDB.set(`${sourceCode}_${targetCode}`, value);
       return value;
@@ -110,9 +123,8 @@ let conversion = (sourceName, targetName, number) => {
     })
     .catch(error => {
       console.log(
-        'error while fetching the API for a conversion, I think youve gone offline'
+        'error while fetching the API for a conversion, I think you ve gone offline'
       );
-      throw error;
     });
 };
 

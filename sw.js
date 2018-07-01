@@ -1,6 +1,6 @@
 let cacheName = 'cache-v1';
 let urlsToCache = [
-  '/currency-converter-ALC-7DaysOfCode-Challenge/',
+  '/currency-ALC-7DaysOfCode-Challenge/',
   './index.html',
   './css/index.css',
   './css/mdb.min.css',
