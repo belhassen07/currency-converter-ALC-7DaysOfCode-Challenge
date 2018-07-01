@@ -83,7 +83,7 @@ let conversion = (sourceName, targetName, number) => {
   let value;
   IDB.get(`${sourceCode}_${targetCode}`)
     .then(val => {
-      if (val != undefined) {
+      if (typeof val == 'number') {
         console.log(val);
         value = val;
       } else {
